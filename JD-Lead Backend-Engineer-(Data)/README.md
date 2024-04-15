@@ -15,7 +15,7 @@
 - Make sure your script is robust by including error handling and data validation.
 
 **What to turn in:**
-- 💻 Python code with clear comments.
+- 💻🐍 Python code with clear comments.
 - 📃 A README that guides us through your script operations and the flow of data.
 
 ### 🤖 Task 3: ML/AI Data Infrastructure Outline
@@ -30,7 +30,7 @@
 - Show us a quick implementation using Langchain to boost a particular aspect of your data pipeline, emphasizing how it can generate insights or aid data operations.
 
 **What to turn in:**
-- 🖥️ Source code for your implementation.
+- 🖥️🐍 Python source code for your implementation.
 - 📘 A short guide or document explaining the benefits and application of Langchain in your proposed setup.
 
 ## 📊 Evaluation Criteria
