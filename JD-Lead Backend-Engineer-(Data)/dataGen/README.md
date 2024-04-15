@@ -1,13 +1,14 @@
 ### README: Data Generation for Technical Work Trial 🚀
 
 #### Overview 📋
-This project includes a Node.js script designed to generate mock data simulating outputs from three different APIs: Notion, Jira, and Slack. This data can be used for testing purposes, particularly for exercises involving data extraction, cleaning, and performing contextual analysis.
+This project includes a Node.js script designed to generate mock data simulating outputs from three different APIs: Notion, Jira, and Slack. This data can be used for testing purposes, particularly for exercises involving data extraction, cleaning, and performing contextual analysis. You should see the `notionData.json`, `jiraData.json`, `slackData.json` files as sample data.
 
 #### Contents of the Project 📁
-- `generateData.js`: The script that generates JSON files with mock data.
+- `generateData.js`: The script that generates JSON files with mock data. 
 - `notionData.json`, `jiraData.json`, `slackData.json`: Output files containing the generated data for Notion, Jira, and Slack respectively.
 
 #### Prerequisites 📚
+(if you want more data, or to edit the outputs)
 - Node.js (recommended: Node.js v12.x or higher)
 - NPM (Node Package Manager)
 
