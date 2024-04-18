@@ -85,9 +85,9 @@ function generateSlackData(count = 100) {
 }
 
 // Generate data
-const notionData = generateNotionData(15000); // Generates 150 entries for Notion
-const jiraData = generateJiraData(15880); // Generates 150 entries for Jira
-const slackData = generateSlackData(23150); // Generates 150 entries for Slack
+const notionData = generateNotionData(150); // Generates 150 entries for Notion
+const jiraData = generateJiraData(150); // Generates 150 entries for Jira
+const slackData = generateSlackData(150); // Generates 150 entries for Slack
 
 // Save to files
 fs.writeFile("notionData.json", JSON.stringify(notionData, null, 2), (err) => {
