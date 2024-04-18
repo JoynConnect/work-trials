@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "plumblebee"
+version = "0.1.0"
+description = "Take-home exercise for backend engineering at Joyn"
+authors = ["Rebecca Lovering <lovering810@gmail.com>"]
+
+
+[tool.poetry.dependencies]
+python = "^3.12"
+plumbingbird = "*"
+pytest = "*"
+psycopg2 = "*"
+requests = "*"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
