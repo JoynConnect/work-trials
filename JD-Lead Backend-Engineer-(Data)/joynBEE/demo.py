@@ -1,4 +1,4 @@
-from plumblebee.analysis_primitives import (
+from joynBEE.analysis_primitives import (
     CoreDatum, Data, ParseAttributeError
     )
 
