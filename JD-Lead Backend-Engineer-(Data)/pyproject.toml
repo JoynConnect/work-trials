@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "plumblebee"
+name = "joynBEE"
 version = "0.1.0"
 description = "Take-home exercise for backend engineering at Joyn"
 authors = ["Rebecca Lovering <lovering810@gmail.com>"]
