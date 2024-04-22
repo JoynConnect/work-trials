@@ -9,3 +9,45 @@
 
 # JoynBEE (Back End Engineering)
 
+## To Run
+
+To run the report, run `basic.py` from within the defined environment. Keep reading for more specifics.
+
+## Environment & Dependency Management
+
+### To set up poetry env
+
+1. [Install poetry on your system](https://python-poetry.org/docs/#installing-with-the-official-installer)
+2. Navigate to the `JD-Lead Backend-Engineer-(Data)` directory and run `poetry install` to create the environment
+3. Run `poetry shell` so commands are executed in the environment
+
+I've used poetry here for its underlying use of pip (no conda installation), and convenient packaging. If you are using VSCode to inspect and run files and have Python extensions, be sure to click the version of Python in the lower right of your VSCode pane and make sure that the version from the joynbee Poetry environment is the one being used (otherwise, you will get a lot of misleading angry red lines in files).
+
+
+## Code Structure
+
+This code is built as a series of interacting modular classes. I have imposed boundaries on them that reflect both how I think and what I believe to be reasonable in the business context I am imagining for their use. While it is by no means perfect, I hope the gist is clear. 
+
+### Primitives
+
+In `analysis_primitives.py`, you can see classes for the different combinations of data coming in from a source. These are intended to be quite generic, such that they can be extended in child classes to meet a number of different analytical needs, while remaining interoperable. Principally, there are three different tiers of organization, each delineated by a different categorical boundary:
+
+- CoreDatum: a single entry of data, in the context of the generate ddata, a shared shape representation of a single valid JSON dict message from a single source.
+- PlatformData: a platform(source)-bounded collection of CoreDatum objects, including logic particular to the platform to transform its messages into CoreDatum instances.
+- Corpus: a platform-agnostic combined body of CoreDatum instances, at which level analysis is intended to be performed (any analysis over contributing PlatformData objects is intended to be performed in the context of its fellows)
+
+This file also contains a few custom errors indicative of problems with ingestion (missing fields, other oddities).
+
+### Platforms
+
+`platforms.py` houses platform-specific definitions of child classes of `PlatformData` from the primitives file. In time, it's quite likely that more functionality per-platform would arise, occasioning separate directories for each, but for the scope of this exercise, they are all together.
+
+Even within the scope of this task, I found the platforms do not have attributional parity. The logic in `platforms.py` includes enrichment for those not having a single unique ID field, extraction of the quite funkily encoded epoch timestamp from Slack's `ts` field, and some other goodies I discovered as I went through the data.
+
+**NOTE**: there are several points at which I made design decisions myself (what identifier to capture about a platform user, for instance) that I would normally have made in concert with other project participants or stakeholders. 
+
+### Tooling (Basic.py)
+
+`basic.py` is where the assembly and analysis tools are for the cross-platform corpus. It draws from the primitives and platforms, using a crude plugin method to assign and populate appropriate `PlatformData` instances for the defined platforms, then assembles a `Corpus` across them and performs a quick analysis of activity over time.
+
+The corpus here, due to its randomized generation, does not reflect patterns I would usually like to investigate in the context of an analyst, but volume of activity over users and platforms and time is a reasonable enough thing to want to know about, and it provides a use case through which to see how the pieces of this code are supposed to work together.
