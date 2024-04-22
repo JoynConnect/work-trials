@@ -1,5 +1,6 @@
 import pytest
 import joynBEE.langtools as lt
+from joynBEE.textanalysis import Authorship
 
 from joynBEE.basic import assemble_corpus
 
@@ -21,6 +22,12 @@ def ragdoll():
     return lt.RAGDoll(corpus=CORPUS, tool="cohere")
 
 
+@pytest.fixture
+def authorboat():
+
+    return Authorship()
+
+
 def test_init(nlp):
 
     assert nlp
@@ -38,10 +45,33 @@ def test_query(ragdoll):
     assert isinstance(res, str)
 
 
-# def test_authorship(ragdoll):
+# def test_authorcorpgen(authorboat):
 
-#     res = nlp.query(
-#         "Which slack user writes most like jira user 'Jimmie82@hotmail.com'?"
-#     )
-#     assert isinstance(res, dict)
-#     assert len(res["context"]) == 4
+
+def test_user_docs(authorboat):
+    source_platform = "jira"
+    user = "Daisy_Langworth@yahoo.com"
+
+    result = authorboat.get_user_embeds(
+        corpus=CORPUS, source_platform=source_platform, user=user
+    )
+
+    assert result
+    assert isinstance(result, list)
+
+
+def test_resolve_user(authorboat):
+    source_platform = "jira"
+    user = "Daisy_Langworth@yahoo.com"
+
+    authorboat.resolve_user_on_platform(
+        corpus=CORPUS, source_platform=source_platform, user=user
+    )
+    assert authorboat.platform_embeddings
+    assert authorboat.user_directory
+    shouldbe = {
+        "jira": "Daisy_Langworth@yahoo.com",
+        "slack": ("UbBAB7e76", 1),
+        "notion": ("UbBAB7e76", 1),
+    }
+    assert shouldbe in authorboat.user_directory.values()
