@@ -4,6 +4,7 @@ import logging
 
 logformat = "%(asctime)s : %(levelname)s : %(name)s : %(message)s"
 logging.basicConfig(level=logging.DEBUG, format=logformat)
+logger = logging.getLogger("joynBEE")
 
 
 def assign_data_platform(platform: str) -> PlatformData:
@@ -70,6 +71,12 @@ def generate_output(paired: list[tuple]) -> str:
     output_list = []
 
     for a, r in paired:
+        assert issubclass(
+            a, CorpusAnalyst
+        ), f"Expected analyst not a CorpusAnalyst, but {a.__class__.__name__}"
+        assert isinstance(
+            r, dict
+        ), f"Expected result dictionary not a dict, but {type(r)}"
         out = f"\n{a.__name__}"
 
         for key in r.keys():
@@ -84,20 +91,26 @@ def generate_output(paired: list[tuple]) -> str:
 
 def main():
 
-    logger = logging.getLogger("joynBEE")
-    platform_list = ["jira", "notion", "slack"]
-    corpus = assemble_corpus(platform_list)
+    try:
+        platform_list = ["jira", "notion", "slack"]
+        corpus = assemble_corpus(platform_list)
 
-    analyses = [Temporal]
+        analyses = [Temporal]
 
-    results = analyze_corpus(corpus=corpus, analyses=analyses)
-    paired = zip(analyses, results)
-    output = generate_output(paired=paired)
-    logger.info(
-        f"""The following findings have been generated
-        for this corpus of data from {platform_list}:
-        {output}"""
-    )
+        results = analyze_corpus(corpus=corpus, analyses=analyses)
+        paired = zip(analyses, results)
+        output = generate_output(paired=paired)
+        logger.info(
+            f"""The following findings have been generated
+            for this corpus of data from {platform_list}:
+            {output}"""
+        )
+    except Exception as e:
+        logger.fatal(
+            f"""Something unexpected happened!
+            Please report this error to the author (lovering810): 
+            {e}"""
+        )
 
 
 if __name__ == "__main__":
