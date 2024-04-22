@@ -69,6 +69,7 @@ class Authorship(CorpusAnalyst):
             # embed/vectorize the rest of the platform corpus and SAVE IT
             # not most efficient for shrinking search space, but can be
             # economical in terms of API calls, depending on embedding.
+            self.logger.info(f"########## Processing {plat.upper()}")
             if plat in self.platform_embeddings.keys():
                 db = self.platform_embeddings[plat]
             else:

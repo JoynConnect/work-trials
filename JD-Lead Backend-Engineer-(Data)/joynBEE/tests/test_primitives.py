@@ -4,23 +4,20 @@ from datetime import datetime
 from langchain.docstore.document import Document
 import pytest
 
-
-@pytest.fixture
-def core_dict():
-    return {
-        "platform": "testing_platform",
-        "platform_id": "fake_id",
-        "update_time": datetime(1983, 3, 31, 5, 4),
-        "priority": "low",
-        "status": "open",
-        "owners": ["fakey McFakerson", "Bob"],
-        "content": "Lorem ipsum doesn't even start with a whole word!",
-    }
+CORE_DICT = {
+    "platform": "testing_platform",
+    "platform_id": "fake_id",
+    "update_time": datetime(1983, 3, 31, 5, 4),
+    "priority": "low",
+    "status": "open",
+    "owners": ["fakey McFakerson", "Bob"],
+    "content": "Lorem ipsum doesn't even start with a whole word!",
+}
 
 
 @pytest.fixture
-def core_datum(core_dict):
-    return ap.CoreDatum(**core_dict)
+def core_datum():
+    return ap.CoreDatum(**CORE_DICT)
 
 
 @pytest.fixture
@@ -46,7 +43,7 @@ def test_coreDatum(core_datum):
         _ = ap.CoreDatum("not", "enough", "fields")
 
 
-def test_platformData(platformdata, core_datum, core_dict):
+def test_platformData(platformdata, core_datum):
 
     with pytest.raises(FileNotFoundError):
         platformdata.get_platform_data()
@@ -57,12 +54,15 @@ def test_platformData(platformdata, core_datum, core_dict):
     assert platformdata.is_complete(core_datum)
     assert platformdata.validatum(core_datum)
 
-    assert core_datum == platformdata.parse_datum(core_dict)
+
+def test_parse(platformdata):
+    assert platformdata.cache == []
+    with pytest.raises(NotImplementedError):
+        platformdata.parse_data(data=[CORE_DICT])
+
+
+def test_errors(platformdata):
+
     platformdata.errors = 100
     with pytest.raises(IndexError):
-        _ = platformdata.parse_datum(core_dict)
-
-    assert platformdata.cache == []
-    data = [core_dict]
-    platformdata.parse_data(data=data)
-    assert platformdata.cache == [core_datum]
+        _ = platformdata.parse_datum(CORE_DICT)

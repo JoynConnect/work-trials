@@ -90,6 +90,9 @@ class PlatformData:
         Checks for minimal representation of required fields for
         this source's objects.
         """
+        assert isinstance(
+            parsed_datum, CoreDatum
+        ), f"submitted datum is {type(parsed_datum)}, not CoreDatum"
         result = False
         missing_attrs = [
             key for key in asdict(parsed_datum).keys() if not asdict(parsed_datum)[key]
@@ -112,10 +115,17 @@ class PlatformData:
         Check the parsed datum for completeness
         (and in future, expected values in fields).
         """
-        return self.is_complete(parsed_datum=parsed_datum)
+        try:
+            return self.is_complete(parsed_datum=parsed_datum)
         # TODO: define platform-specific qualia in self.conforms()
         # wellformed = self.conforms(parsed_datum=parsed_datum)
         # return all([populated, wellformed])
+        except Exception as e:
+            self.errors += 1
+            self.logger.warning(ParseError(e))
+
+    def _parse_datum(self, raw_datum: dict) -> CoreDatum:
+        raise NotImplementedError("This must be defined in a child class.")
 
     def parse_datum(self, raw_datum: dict, failure_limit: int = 100) -> CoreDatum:
         """
@@ -132,13 +142,17 @@ class PlatformData:
             raise IndexError(f"Too many failures ({self.errors})")
         try:
             return self._parse_datum(raw_datum)
+        except NotImplementedError as n:
+            raise NotImplementedError(n)
         except Exception as e:
             self.errors += 1
             self.logger.warning(ParseError(e))
 
     def parse_data(self, data: list[dict] = None) -> None:
         if not data:
+            self.logger.warning("No data provided, loading from file.")
             data = self.get_platform_data()
+        self.logger.info(f"Data has {len(data)} entries.")
         self.cache = [x for x in map(self.parse_datum, data) if self.validatum(x)]
 
         self.logger.info(

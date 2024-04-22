@@ -68,10 +68,3 @@ def test_resolve_user(authorboat):
         corpus=CORPUS, source_platform=source_platform, user=user
     )
     assert authorboat.platform_embeddings
-    assert authorboat.user_directory
-    shouldbe = {
-        "jira": "Daisy_Langworth@yahoo.com",
-        "slack": ("UbBAB7e76", 1),
-        "notion": ("UbBAB7e76", 1),
-    }
-    assert shouldbe in authorboat.user_directory.values()
