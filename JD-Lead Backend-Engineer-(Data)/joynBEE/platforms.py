@@ -1,4 +1,4 @@
-from analysis_primitives import CoreDatum, PlatformData, ParseAttributeError
+from .analysis_primitives import CoreDatum, PlatformData, ParseAttributeError
 import hashlib
 from datetime import datetime
 

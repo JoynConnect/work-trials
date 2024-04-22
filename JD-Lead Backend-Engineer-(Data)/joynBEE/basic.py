@@ -1,5 +1,5 @@
-from platforms import Jira, Notion, Slack
-from analysis_primitives import CorpusAnalyst, Corpus, PlatformData, Temporal
+from .platforms import Jira, Notion, Slack
+from .analysis_primitives import CorpusAnalyst, Corpus, PlatformData, Temporal
 import logging
 
 logformat = "%(asctime)s : %(levelname)s : %(name)s : %(message)s"
