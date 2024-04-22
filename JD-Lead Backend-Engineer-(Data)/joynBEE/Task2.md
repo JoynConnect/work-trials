@@ -13,6 +13,13 @@
 
 To run the report, run `basic.py` from within the defined environment. Keep reading for more specifics.
 
+If you want to run the tests, you'll still need the environment, but can then just navigate to `tests` and run `pytest`. I recommend adding some flags for visibility into testing process like so:
+
+
+```
+pytest -vv --log-cli-level=INFO
+```
+
 ## Environment & Dependency Management
 
 ### To set up poetry env
@@ -51,3 +58,21 @@ Even within the scope of this task, I found the platforms do not have attributio
 `basic.py` is where the assembly and analysis tools are for the cross-platform corpus. It draws from the primitives and platforms, using a crude plugin method to assign and populate appropriate `PlatformData` instances for the defined platforms, then assembles a `Corpus` across them and performs a quick analysis of activity over time.
 
 The corpus here, due to its randomized generation, does not reflect patterns I would usually like to investigate in the context of an analyst, but volume of activity over users and platforms and time is a reasonable enough thing to want to know about, and it provides a use case through which to see how the pieces of this code are supposed to work together.
+
+## NOTES and TODOS
+
+If I were to do this again, I would probably have spent more time manipulating the data generation script to create a corpus more similar to what I believe reality would generate: 
+- smaller number of users per platform with consistent text across them
+- more varied types of messages per platform - though I suppose that can be controlled on ingestion, I would have loved to see what I could do with JIRA ticket *comments*, not just story descriptions.
+
+This said, I appreciate the convenience of the dataGen tooling provided, and hope that my response to it offers some value and insight.
+
+### TODO
+
+As always, there are things left undone:
+
+- more robust data validation (not just missing data, but malformed)
+- more robust analysis (answering a proper business question, more useful outputs like visualization, e.g.)
+- more testing (more unhappy-path tests, mocks for expensive operations, more branches of implementation tested)
+- more appropriate ingestion (from live API, e.g.)
+- deployment & orchestration

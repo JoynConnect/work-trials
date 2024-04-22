@@ -27,7 +27,7 @@ def assign_data_platform(platform: str) -> PlatformData:
         case _:
             raise NotImplementedError(
                 f"""No Data class encoded
-                                      for platform {platform}"""
+                    for platform {platform}"""
             )
 
     return data_platform()
