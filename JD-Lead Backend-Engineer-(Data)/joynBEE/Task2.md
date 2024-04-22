@@ -30,6 +30,10 @@ pytest -vv --log-cli-level=INFO
 
 I've used poetry here for its underlying use of pip (no conda installation), and convenient packaging. If you are using VSCode to inspect and run files and have Python extensions, be sure to click the version of Python in the lower right of your VSCode pane and make sure that the version from the joynbee Poetry environment is the one being used (otherwise, you will get a lot of misleading angry red lines in files).
 
+### Secrets
+
+I've included an example secrets.json file that you'll need to provide at least a COHERE_API_KEY value to in order to run the live tests that talk to langchain.
+
 
 ## Code Structure
 
