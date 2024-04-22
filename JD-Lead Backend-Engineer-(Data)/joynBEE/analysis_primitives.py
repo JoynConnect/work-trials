@@ -58,7 +58,7 @@ class ParseAttributeError(Exception):
         super().__init__(message)
 
 
-class Data:
+class PlatformData:
     """
     Per-platform data acquisition tooling: loads
     and shapes platform data into an array of CoreDatum instances.
@@ -167,7 +167,7 @@ class Corpus:
         datum.corpus_id = hashlib.md5(unique_id.encode()).hexdigest()
         return datum
 
-    def align_data(self, data_list: list[Data]):
+    def align_data(self, data_list: list[PlatformData]):
         """
         Unpacks the caches of the passed per-platform Data objects,
         flattening them into a single body of same-shaped CoreDatum objects
@@ -198,9 +198,9 @@ class CorpusAnalyst:
         its length and start/end.
         """
 
-        self.start = min([x.update_time for x in corpus])
+        self.start = min([x.update_time for x in corpus.aligned])
         self.logger.debug(f"Corpus starts at {self.start}")
-        self.end = max([x.update_time for x in corpus])
+        self.end = max([x.update_time for x in corpus.aligned])
         self.logger.debug(f"Corpus ends at {self.end}")
 
         corpus_lifespan = self.end - self.start
@@ -219,14 +219,38 @@ class Temporal(CorpusAnalyst):
     def __init__(self) -> None:
         super().__init__()
 
+    def get_most_active_users(self):
+        user_actions = defaultdict(tuple)
+        for day in self.dailies.keys():
+            activity = self.dailies[day]
+            u_act = activity["users"]
+            for user in u_act.keys():
+                acts = u_act[user]
+                if user in user_actions.keys():
+                    if acts > user_actions[user][0]:
+                        user_actions[user] = (acts, day)
+                else:
+                    user_actions[user] = (acts, day)
+
+        return sorted(user_actions.items(), key=lambda x: x[1], reverse=False)[:5]
+
+    def get_most_active_day(self):
+        maximum = defaultdict(int)
+        for day in self.dailies.keys():
+            d_acts = self.dailies[day]["platforms"]
+            maximum[day] = sum(d_acts.values())
+
+        return sorted(maximum.items(), key=lambda x: x[1], reverse=True)[:5]
+
     def analyze(self, corpus: list[CoreDatum]):
         self.get_basic_stats(corpus=corpus)
 
         report = {}
         corpus_population = groupby(
-            set([(x.platform, u) for x in corpus for u in x.owners]), key=lambda x: x[0]
+            set([(x.platform, u) for x in corpus.aligned for u in x.owners]),
+            key=lambda x: x[0],
         )
-        report["population"] = corpus_population
+        self.users = [subitem for item in corpus_population for subitem in item[1]]
 
         # generate sequence of days over lifespan
         # NOTE: Because the total span of data as generated is only 50 days,
@@ -239,7 +263,7 @@ class Temporal(CorpusAnalyst):
         for span_start, span_end in sequence:
             relevant_corpus = [
                 x
-                for x in corpus
+                for x in corpus.aligned
                 if x.update_time >= span_start and x.update_time < span_end
             ]
             # platform-level analysis
@@ -251,7 +275,9 @@ class Temporal(CorpusAnalyst):
 
             # user analysis
             # unpack lists of users w platforms
-            user_tups = [(x.platform, u, x.corpus_id) for x in corpus for u in x.owners]
+            user_tups = [
+                (x.platform, u, x.corpus_id) for x in corpus.aligned for u in x.owners
+            ]
             user_activity = groupby(user_tups, key=lambda x: (x[0], x[1]))
             user_dict = {}
             for key, results in user_activity:
@@ -260,5 +286,10 @@ class Temporal(CorpusAnalyst):
             daily_entry = {"platforms": actividict, "users": user_dict}
             daily_stats[span_start.strftime("%Y-%m-%d")] = daily_entry
 
-        report["daily_stats"] = daily_stats
+        self.dailies = daily_stats
+        report["most_active_users"] = self.get_most_active_users()
+        report["most_active_days"] = self.get_most_active_day()
+        report["most_active_platform"] = sorted(
+            platform_days.items(), key=lambda x: x[1], reverse=True
+        )[0]
         self.results = report

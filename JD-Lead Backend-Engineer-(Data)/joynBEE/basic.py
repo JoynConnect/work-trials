@@ -1,8 +1,12 @@
-from joynBEE.platforms import Jira, Notion, Slack
-from joynBEE.analysis_primitives import CorpusAnalyst, Corpus, Data, Temporal
+from platforms import Jira, Notion, Slack
+from analysis_primitives import CorpusAnalyst, Corpus, PlatformData, Temporal
+import logging
+
+logformat = "%(asctime)s : %(levelname)s : %(name)s : %(message)s"
+logging.basicConfig(level=logging.DEBUG, format=logformat)
 
 
-def assign_data_platform(platform: str) -> Data:
+def assign_data_platform(platform: str) -> PlatformData:
     """
     Returns a platform-specific Data class instance
 
@@ -20,19 +24,25 @@ def assign_data_platform(platform: str) -> Data:
         case "Slack":
             data_platform = Slack
         case _:
-            raise NotImplementedError(f"""No Data class encoded
-                                      for platform {platform}""")
+            raise NotImplementedError(
+                f"""No Data class encoded
+                                      for platform {platform}"""
+            )
 
     return data_platform()
 
 
 def assemble_corpus(platform_list: list[str]) -> Corpus:
+    """
+    Given a list of platform names, collects and parses
+    data for each, then aligns in a single Corpus instance.
+    """
 
     cor = Corpus()
     # assemble data_list
     data_list = []
     for pname in platform_list:
-        pinstance = assign_data_platform(pname)
+        pinstance = assign_data_platform(pname.lower())
         pinstance.parse_data()
         data_list.append(pinstance)
     cor.align_data(data_list=data_list)
@@ -41,6 +51,10 @@ def assemble_corpus(platform_list: list[str]) -> Corpus:
 
 
 def analyze_corpus(corpus: Corpus, analyses: list[CorpusAnalyst]):
+    """
+    For a given Corpus instance, perform all analyses by
+    array of Analysts submitted.
+    """
 
     reports = []
     for analyst_class in analyses:
@@ -51,13 +65,39 @@ def analyze_corpus(corpus: Corpus, analyses: list[CorpusAnalyst]):
     return reports
 
 
+def generate_output(paired: list[tuple]) -> str:
+
+    output_list = []
+
+    for a, r in paired:
+        out = f"\n{a.__name__}"
+
+        for key in r.keys():
+            vals = r[key]
+            row = f"\n\t{key}: {vals}"
+            out += row
+
+        output_list.append(out)
+
+    return "\n".join(output_list)
+
+
 def main():
 
-    corpus = assemble_corpus(platform_list=["jira", "notion", "slack"])
+    logger = logging.getLogger("joynBEE")
+    platform_list = ["jira", "notion", "slack"]
+    corpus = assemble_corpus(platform_list)
 
     analyses = [Temporal]
 
-    _ = analyze_corpus(corpus=corpus, analyses=analyses)
+    results = analyze_corpus(corpus=corpus, analyses=analyses)
+    paired = zip(analyses, results)
+    output = generate_output(paired=paired)
+    logger.info(
+        f"""The following findings have been generated
+        for this corpus of data from {platform_list}:
+        {output}"""
+    )
 
 
 if __name__ == "__main__":
