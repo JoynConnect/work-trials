@@ -1,11 +1,9 @@
-from joynBEE.analysis_primitives import (
-    CoreDatum, Data, ParseAttributeError
-    )
+from analysis_primitives import CoreDatum, PlatformData, ParseAttributeError
 import hashlib
 from datetime import datetime
 
 
-class Jira(Data):
+class Jira(PlatformData):
 
     def __init__(self) -> None:
         super().__init__(platform="jira")
@@ -20,7 +18,8 @@ class Jira(Data):
             "priority": raw_datum.get("priority").get("name"),
             "status": raw_datum.get("status").get("name"),
             "owners": [(raw_datum.get("assignee").get("emailAddress"))],
-            "content": raw_datum.get("summary")}
+            "content": raw_datum.get("summary"),
+        }
 
         return datum_dict
 
@@ -35,7 +34,7 @@ class Jira(Data):
         return CoreDatum(**datum_dict)
 
 
-class Notion(Data):
+class Notion(PlatformData):
 
     def __init__(self) -> None:
         super().__init__(platform="notion")
@@ -66,18 +65,18 @@ class Notion(Data):
             "platform": self.platform,
             "platform_id": raw_datum.get("id"),
             "update_time": self.parse_time(raw_datum.get("last_edited_time")),
-            "priority": datum_properties.get(
-                "Priority").get("select").get("name"),
+            "priority": datum_properties.get("Priority").get("select").get("name"),
             "status": datum_properties.get("Status").get("select").get("name"),
-            "owners": [x.get("email") for x in datum_properties.get(
-                "Assignee").get("people")],
-            "content": self.collect_text(datum_properties.get("Name"))
-            }
+            "owners": [
+                x.get("email") for x in datum_properties.get("Assignee").get("people")
+            ],
+            "content": self.collect_text(datum_properties.get("Name")),
+        }
 
         return CoreDatum(**datum_dict)
 
 
-class Slack(Data):
+class Slack(PlatformData):
 
     def __init__(self) -> None:
         super().__init__(platform="slack")
@@ -111,7 +110,7 @@ class Slack(Data):
             "priority": "comment",
             "status": "comment",
             "owners": [raw_datum.get("user")],
-            "content": raw_datum.get("text")
-            }
+            "content": raw_datum.get("text"),
+        }
 
         return CoreDatum(**datum_dict)
