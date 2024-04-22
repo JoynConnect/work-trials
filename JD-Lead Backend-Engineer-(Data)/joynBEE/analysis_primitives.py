@@ -198,9 +198,9 @@ class CorpusAnalyst:
         its length and start/end.
         """
 
-        self.start = min([x.update_time for x in corpus.aligned])
+        self.start = min([x.update_time for x in corpus])
         self.logger.debug(f"Corpus starts at {self.start}")
-        self.end = max([x.update_time for x in corpus.aligned])
+        self.end = max([x.update_time for x in corpus])
         self.logger.debug(f"Corpus ends at {self.end}")
 
         corpus_lifespan = self.end - self.start
@@ -247,7 +247,7 @@ class Temporal(CorpusAnalyst):
 
         report = {}
         corpus_population = groupby(
-            set([(x.platform, u) for x in corpus.aligned for u in x.owners]),
+            set([(x.platform, u) for x in corpus for u in x.owners]),
             key=lambda x: x[0],
         )
         self.users = [subitem for item in corpus_population for subitem in item[1]]
@@ -263,7 +263,7 @@ class Temporal(CorpusAnalyst):
         for span_start, span_end in sequence:
             relevant_corpus = [
                 x
-                for x in corpus.aligned
+                for x in corpus
                 if x.update_time >= span_start and x.update_time < span_end
             ]
             # platform-level analysis
@@ -275,9 +275,7 @@ class Temporal(CorpusAnalyst):
 
             # user analysis
             # unpack lists of users w platforms
-            user_tups = [
-                (x.platform, u, x.corpus_id) for x in corpus.aligned for u in x.owners
-            ]
+            user_tups = [(x.platform, u, x.corpus_id) for x in corpus for u in x.owners]
             user_activity = groupby(user_tups, key=lambda x: (x[0], x[1]))
             user_dict = {}
             for key, results in user_activity:

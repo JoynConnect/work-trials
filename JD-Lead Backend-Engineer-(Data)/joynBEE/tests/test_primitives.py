@@ -48,7 +48,7 @@ def test_coreDatum(core_datum):
 
 def test_platformData(platformdata, core_datum, core_dict):
 
-    with pytest.raises(AssertionError):
+    with pytest.raises(FileNotFoundError):
         platformdata.get_platform_data()
 
     with pytest.raises(NotImplementedError):
