@@ -5,7 +5,7 @@
 **Here’s what to do:**
 
 - Whip up a Python script to simulate extracting, cleaning, and performing a basic contextual analysis of provided sample data (see `dataGen` folder)
-- The Python script should watch for changes in src data and run through the extractin and cleaning if new data is loaded
+- The Python script should watch for changes in src data and run through the extraction and cleaning if new data is loaded
 - Ensure your script includes robust error handling and data validation.
 
 **What to Turn In:**
