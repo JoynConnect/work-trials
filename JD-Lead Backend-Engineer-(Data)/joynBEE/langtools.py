@@ -20,7 +20,6 @@ class EmbeddedCorpus:
     def __init__(self, corpus: Corpus, tool: str) -> None:
         self.llm = None
         self.vectorstore = None
-        self.retrievador = None
         self.assign_tooling(tool=tool)
         self.setup_vectorstore(corpus=corpus)
         self.logger = logging.getLogger(__class__.__name__)
@@ -43,25 +42,6 @@ class EmbeddedCorpus:
         self.llm = llm
         return
 
-    @staticmethod
-    def format_docs(docs):
-        return "\n\n".join(doc.page_content for doc in docs)
-
-    def assign_prompt(self, keyword: str = "generic_expert"):
-
-        prompt = ChatPromptTemplate.from_template(
-            """
-            Answer the following question based only on the provided context:
-
-            <context>
-            {context}
-            </context>
-
-            Question: {input}
-            """
-        )
-        return prompt
-
     def setup_vectorstore(self, corpus: Corpus):
         # assemble text
         docs = [x.to_lcdoc() for x in corpus.aligned]
@@ -74,24 +54,70 @@ class EmbeddedCorpus:
         retrievador = vectorstore.as_retriever()
         self.retrievador = create_retrieval_chain(retrievador, document_chain)
 
-    def setup(self, corpus: Corpus):
-        self.setup_vectorstore(corpus=corpus)
+
+class RAGDoll(EmbeddedCorpus):
+
+    def __init__(self, corpus: Corpus, tool: str) -> None:
+        super().__init__(corpus, tool)
+        self.retrievador = None
+
+    def assign_prompt(self, keyword: str = "generic_expert"):
+        """
+        Based on a keyword, assign a prompt template for answering
+        queries with this model. Currently only two implemented:
+        context-bounded (default) and the one pulled from the hub.
+        """
+
+        match keyword:
+
+            case _:
+                template = """
+            Answer the following question based only on the provided context:
+
+            <context>
+            {context}
+            </context>
+
+            Question: {input}
+            """
+
+        try:
+            prompt = ChatPromptTemplate.from_template(template)
+        except Exception as e:
+            self.logger.warning(f"Prompt assignment encountered an error: {e}")
+            prompt = hub.pull("rlm/rag-prompt")
+
+        return prompt
+
+    @staticmethod
+    def format_docs(docs):
+        return "\n\n".join(doc.page_content for doc in docs)
+
+    def setup(self, corpus: Corpus, prompt_key: str = None):
+        """
+        Create a RAG chain retriever from the provided corpus.
+        """
+        if not self.vectorstore:
+            self.setup_vectorstore(corpus=corpus)
 
         # Retrieve and generate using the relevant snippets
         retriever = self.vectorstore.as_retriever()
-        prompt = hub.pull("rlm/rag-prompt")
+        prompt = self.assign_prompt(prompt_key)
 
         # chain
-        rag_chain = (
+        self.retrievador = (
             {"context": retriever | self.format_docs, "question": RunnablePassthrough()}
             | prompt
             | self.llm
             | StrOutputParser()
         )
 
-        self.rag_chain = rag_chain
-
     def query(self, query_text: str):
-        results = self.retrievador.invoke({"input": query_text})
+        """
+        Query the RAG engine created by this object. Currently returns
+        all metadata along with the natural language answer, against
+        future refinement.
+        """
+        results = self.retrievador.invoke(query_text)
         self.logger.info(results)
         return results

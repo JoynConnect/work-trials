@@ -1,4 +1,3 @@
-# import plumbingbird as pb
 from collections import defaultdict
 from dataclasses import dataclass, asdict
 import json
@@ -60,6 +59,10 @@ class ParseAttributeError(Exception):
 
 
 class Data:
+    """
+    Per-platform data acquisition tooling: loads
+    and shapes platform data into an array of CoreDatum instances.
+    """
 
     def __init__(self, platform: str) -> None:
         self.platform = platform
@@ -71,7 +74,9 @@ class Data:
         """
         Load platform data from file - NOTE: this is appropriate for this
         minimal implementation, but from-file is an unlikely paradigm
-        for receiving API data.
+        for receiving API data. In a mature version, this would likely
+        be replaced by an API call with appropriate pagination (see
+        plumbingbird library).
         """
         filename = DATA_DIR / f"{self.platform}Data.json"
         assert filename, f"""No data found in {DATA_DIR}
@@ -94,20 +99,18 @@ class Data:
         return result
 
     def conforms(self, parsed_datum: CoreDatum) -> bool:
+        """
+        Intended for additional checks on per-platform data integrity,
+        a deeper calculation than just looking for empty fields. Given
+        limited generated data, not currently implemented for any
+        platform.
+        """
         raise NotImplementedError("This must be defined in a child class.")
-
-    @staticmethod
-    def parse_langchain_metadata(core_dict: dict, metadata: dict):
-        # put everything except text content in metadata
-        metakeys = [key for key in core_dict.keys() if key != "content"]
-        for key in metakeys:
-            metadata[key] = core_dict[key]
-
-        return metadata
 
     def validatum(self, parsed_datum: CoreDatum) -> bool:
         """
-        Check the parsed datum for completeness and expected values in fields.
+        Check the parsed datum for completeness
+        (and in future, expected values in fields).
         """
         return self.is_complete(parsed_datum=parsed_datum)
         # TODO: define platform-specific qualia in self.conforms()
@@ -145,22 +148,41 @@ class Data:
 
 
 class Corpus:
+    """
+    Class for aggregating platform-specific Data objects into a
+    unified body of data for analytical purposes.
+    """
 
     def __init__(self) -> None:
         self.aligned = []
 
     def id_item(self, datum: CoreDatum) -> CoreDatum:
+        """
+        Items within a Corpus are only guaranteed uniqueness by a combo
+        of both platform and platform_id, so this method adds a consistently-shaped
+        hash of those fields to each corpus item.
+        """
 
         unique_id = "".join([datum.platform, datum.platform_id])
         datum.corpus_id = hashlib.md5(unique_id.encode()).hexdigest()
         return datum
 
     def align_data(self, data_list: list[Data]):
+        """
+        Unpacks the caches of the passed per-platform Data objects,
+        flattening them into a single body of same-shaped CoreDatum objects
+        for cross comparison.
+        """
         total_corpus = [self.id_item(item) for x in data_list for item in x.cache]
         self.aligned = total_corpus
 
 
 class CorpusAnalyst:
+    """
+    A base class for chainable analysis components, including basic
+    corpus stats for any submitted corpus, though proper analysis
+    is intended to be performed in child classes.
+    """
 
     def __init__(self) -> None:
         self.results = None
@@ -170,6 +192,11 @@ class CorpusAnalyst:
         self.span = None
 
     def get_basic_stats(self, corpus: list[CoreDatum]):
+        """
+        'Basic stats' refers to the temporal outline of the
+        corpus: the span of time over which entries exist,
+        its length and start/end.
+        """
 
         self.start = min([x.update_time for x in corpus])
         self.logger.debug(f"Corpus starts at {self.start}")
@@ -179,11 +206,15 @@ class CorpusAnalyst:
         corpus_lifespan = self.end - self.start
         self.span = corpus_lifespan
 
-    def analyze(self, corpus: list[CoreDatum]):
+    def analyze(self, *args, **kwargs):
         raise NotImplementedError("This must be defined in a child class")
 
 
 class Temporal(CorpusAnalyst):
+    """
+    Analyst for profiling activity in the corpus over time:
+    splits by platform and user+platform.
+    """
 
     def __init__(self) -> None:
         super().__init__()
