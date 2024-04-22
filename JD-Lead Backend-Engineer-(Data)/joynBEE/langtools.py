@@ -1,12 +1,10 @@
 from langchain import hub
 from langchain.cache import InMemoryCache
-from langchain.chains import create_retrieval_chain
 from langchain.globals import set_llm_cache
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_openai import ChatOpenAI, OpenAIEmbeddings
 from langchain_cohere import ChatCohere
 from langchain_cohere.embeddings import CohereEmbeddings
-from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_chroma import Chroma
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
@@ -46,20 +44,18 @@ class EmbeddedCorpus:
         # assemble text
         docs = [x.to_lcdoc() for x in corpus.aligned]
 
-        prompt = self.assign_prompt()
-        document_chain = create_stuff_documents_chain(self.llm, prompt)
-
         # create vectorstore
-        vectorstore = Chroma.from_documents(documents=docs, embedding=self.embeddings)
-        retrievador = vectorstore.as_retriever()
-        self.retrievador = create_retrieval_chain(retrievador, document_chain)
+        self.vectorstore = Chroma.from_documents(
+            documents=docs, embedding=self.embeddings
+        )
 
 
 class RAGDoll(EmbeddedCorpus):
 
-    def __init__(self, corpus: Corpus, tool: str) -> None:
+    def __init__(self, corpus: Corpus, tool: str, prompt_key: str = None) -> None:
         super().__init__(corpus, tool)
         self.retrievador = None
+        self.setup(corpus=corpus, prompt_key=prompt_key)
 
     def assign_prompt(self, keyword: str = "generic_expert"):
         """
@@ -70,7 +66,7 @@ class RAGDoll(EmbeddedCorpus):
 
         match keyword:
 
-            case _:
+            case "context_bounded":
                 template = """
             Answer the following question based only on the provided context:
 
@@ -80,14 +76,19 @@ class RAGDoll(EmbeddedCorpus):
 
             Question: {input}
             """
+            case _:
+                None
 
         try:
             prompt = ChatPromptTemplate.from_template(template)
+            varname = "input"
         except Exception as e:
             self.logger.warning(f"Prompt assignment encountered an error: {e}")
             prompt = hub.pull("rlm/rag-prompt")
+            self.logger.debug(f"Prompt: {prompt}")
+            varname = "question"
 
-        return prompt
+        return prompt, varname
 
     @staticmethod
     def format_docs(docs):
@@ -102,11 +103,11 @@ class RAGDoll(EmbeddedCorpus):
 
         # Retrieve and generate using the relevant snippets
         retriever = self.vectorstore.as_retriever()
-        prompt = self.assign_prompt(prompt_key)
+        prompt, varname = self.assign_prompt(prompt_key)
 
         # chain
         self.retrievador = (
-            {"context": retriever | self.format_docs, "question": RunnablePassthrough()}
+            {"context": retriever | self.format_docs, varname: RunnablePassthrough()}
             | prompt
             | self.llm
             | StrOutputParser()
