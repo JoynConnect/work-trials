@@ -6,4 +6,5 @@ jobs:
     runs-on: ubuntu-latest
     name: A job that only deploys a ReactJS app to s3
     steps:
+      - uses: actions/checkout@v4
       - uses: ./.github/actions/deploy_assets
