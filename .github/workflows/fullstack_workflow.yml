@@ -1,0 +1,9 @@
+name: "JD-Fullstack Workflow"
+on: [push]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: A job that only deploys a ReactJS app to s3
+    steps:
+      - uses: ./.github/actions/deploy_assets.yml
