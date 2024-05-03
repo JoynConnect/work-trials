@@ -12,20 +12,24 @@ provider "aws" {
   region = "us-east-1"
 }
 
+# Setup a new VPC so we don't pollute the default
+# of any exisiting environment.
 resource aws_vpc "joyn_vpc" {
   cidr_block = "172.30.0.0/16"
 }
-
+# The VPC subnet
 resource aws_subnet "joyn_subnet" {
   vpc_id     = aws_vpc.joyn_vpc.id
   cidr_block = "172.30.0.0/20"
-  map_public_ip_on_launch = true
+  map_public_ip_on_launch = true # This one enables assigning a public IP to the EC2 instance.
 }
 
+# Add an internet gateway.
 resource "aws_internet_gateway" "joyn_vpc_gateway" {
   vpc_id = aws_vpc.joyn_vpc.id
 }
 
+# Routing table for the new VPC
 resource "aws_route_table" "joyn_route_table" {
   vpc_id = aws_vpc.joyn_vpc.id
   route {
@@ -34,6 +38,7 @@ resource "aws_route_table" "joyn_route_table" {
  }
 }
 
+# Add route table association.
 resource "aws_route_table_association" "public" {
    subnet_id   = aws_subnet.joyn_subnet.id
    route_table_id = aws_route_table.joyn_route_table.id
@@ -126,6 +131,7 @@ resource "aws_s3_bucket_public_access_block" "joyn_bucket_public_access" {
   restrict_public_buckets = false
 }
 
+# Tell the s3 bucket which asset will work as an entry point for the "static" website.
 resource "aws_s3_bucket_website_configuration" "joyn_client_assets" {
   bucket = aws_s3_bucket.joyn_assets.id
 

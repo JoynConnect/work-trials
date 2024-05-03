@@ -1,5 +1,9 @@
 name: "JD-Fullstack Workflow"
-on: [push]
+#on: [push] // For testing
+on:
+  push:
+    branches:
+      - main
 
 jobs:
   deploy:
