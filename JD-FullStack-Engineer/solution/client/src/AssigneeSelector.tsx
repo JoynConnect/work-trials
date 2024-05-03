@@ -8,6 +8,9 @@ interface props {
 
 const MAX_LENGTH = 100;
 
+/**
+ * Display a selectable assignee list.
+ */
 const AssigneeSelector = ({onAssigneeClick, selectedAssignees}: props) => {
     const { completedTasksStats } = useContext(DashboardContext);
 
@@ -25,9 +28,10 @@ const AssigneeSelector = ({onAssigneeClick, selectedAssignees}: props) => {
                 {
                     topAssignees.map((assignee: string) => {
                         const activeClass = selectedAssignees.includes(assignee) ? 'bg-sky-500 text-white' : '';
+                        const cssClass = 'assignee hover:border-sky-500 border-transparent border-l-2 cursor-pointer p-1';
                         return (
                             <div
-                                className={`assignee hover:border-sky-500 border-transparent border-l-2 cursor-pointer p-1 ${activeClass}`}
+                                className={`${cssClass} ${activeClass}`}
                                 key={assignee}
                                 onClick={() => onAssigneeClick(assignee)}
                             >

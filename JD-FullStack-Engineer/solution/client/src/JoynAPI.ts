@@ -1,6 +1,9 @@
 
+/**
+ * Singleton class that holds all API call logic
+ */
 class JoynAPI {
-    // TODO: Make this configurable
+    // TODO: Make this configurable when the API runs on aws.
     static BASE_URL = 'http://localhost:8080/';
 
     async callAPI(endpoint: string, params: {[key: string]: string}|null, body: {[key: string]: any} = undefined, method: string = 'GET') {
