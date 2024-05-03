@@ -17,11 +17,3 @@ runs:
     - run:
         aws s3 cp JD-FullStack-Engineer/solution/client/dist/app.js s3://joyn-assets/app.js
       shell: bash
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-
-
-
-
-
