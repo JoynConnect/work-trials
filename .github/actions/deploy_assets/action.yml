@@ -6,9 +6,11 @@ runs:
       with:
         node-version: 20
     - run: npm install
+      working-directory: JD-FullStack-Engineer/solution/client
       shell: bash
     - run: npm run build
       shell: bash
+      working-directory: JD-FullStack-Engineer/solution/client
     - uses: actions/setup-python@v5
       with:
         python-version: 3.12
