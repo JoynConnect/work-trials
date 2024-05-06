@@ -64,7 +64,8 @@ api.get('/completed-tasks', (req, res) => {
             // Get by date by assignee completed count.
             const dateStr = getDateTimeAsDateStr(date);
             if (byDateByAssigneeObj.hasOwnProperty(dateStr)) {
-                byDateByAssigneeObj[dateStr][assignee] = count;
+                byDateByAssigneeObj[dateStr][assignee] = (
+                    byDateByAssigneeObj[dateStr][assignee] || 0) + count;
             } else {
                 byDateByAssigneeObj[dateStr] = {[assignee]: count, date: dateStr};
             }

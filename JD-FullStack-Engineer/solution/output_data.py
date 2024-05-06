@@ -42,7 +42,10 @@ def load_completed_by_user_by_date(completed_by_user_by_date):
 def load_data_to_storage(status_distribution, high_priority_status_distribution, completed_by_user_by_date):
     if os.path.exists(STORAGE_PATH):
         logger.debug(f'Replacing {STORAGE_PATH}')
-        os.remove(STORAGE_PATH)
+        con, cur = get_cursor()
+        cur.execute('DROP TABLE completed_by_date')
+        cur.execute('DROP TABLE status_distribution')
+        con.commit()
 
     load_status_distribution(status_distribution, high_priority_status_distribution)
     load_completed_by_user_by_date(completed_by_user_by_date)
