@@ -1,9 +1,13 @@
 const { faker } = require("@faker-js/faker");
 const fs = require("fs");
 
+// Generate data
+let people = [];
+
 function generateNotionData(count = 100) {
   const data = [];
   for (let i = 0; i < count; i++) {
+    const person = people[i % people.length];
     data.push({
       object: "page",
       id: faker.string.uuid(),
@@ -29,7 +33,7 @@ function generateNotionData(count = 100) {
         },
         Assignee: {
           people: [
-            { name: faker.person.fullName(), email: faker.internet.email() },
+            { name: person.fullName, email: person.email },
           ],
         },
       },
@@ -41,6 +45,7 @@ function generateNotionData(count = 100) {
 function generateJiraData(count = 100) {
   const data = [];
   for (let i = 0; i < count; i++) {
+    const person = people[i % people.length];
     data.push({
       id: `JIRA-${i}`,
       created: faker.date.past({ years: 2 }).toISOString(),
@@ -49,8 +54,8 @@ function generateJiraData(count = 100) {
         name: faker.helpers.arrayElement(["Open", "In Review", "Closed"]),
       },
       assignee: {
-        displayName: faker.person.fullName(),
-        emailAddress: faker.internet.email(),
+        displayName: person.fullName,
+        emailAddress: person.email,
       },
       priority: {
         name: faker.helpers.arrayElement([
@@ -84,23 +89,27 @@ function generateSlackData(count = 100) {
   return data;
 }
 
-// Generate data
-const notionData = generateNotionData(15000); // Generates 150 entries for Notion
-const jiraData = generateJiraData(15880); // Generates 150 entries for Jira
-const slackData = generateSlackData(23150); // Generates 150 entries for Slack
 
-// Save to files
-fs.writeFile("notionData.json", JSON.stringify(notionData, null, 2), (err) => {
-  if (err) throw err;
-  console.log("Saved Notion data to notionData.json");
+fs.readFile('people.json', (er, data) => {
+  people = JSON.parse(data);
+  const notionData = generateNotionData(15000); // Generates 150 entries for Notion
+  const jiraData = generateJiraData(15880); // Generates 150 entries for Jira
+  const slackData = generateSlackData(23150); // Generates 150 entries for Slack
+  // Save to files
+  fs.writeFile("../solution/raw_data/notionData.json", JSON.stringify(notionData, null, 2), (err) => {
+    if (err) throw err;
+    console.log("Saved Notion data to notionData.json");
+  });
+
+  fs.writeFile("../solution/raw_data/jiraData.json", JSON.stringify(jiraData, null, 2), (err) => {
+    if (err) throw err;
+    console.log("Saved Jira data to jiraData.json");
+  });
+
+  fs.writeFile("../solution/raw_data/slackData.json", JSON.stringify(slackData, null, 2), (err) => {
+    if (err) throw err;
+    console.log("Saved Slack data to slackData.json");
+  });
 });
 
-fs.writeFile("jiraData.json", JSON.stringify(jiraData, null, 2), (err) => {
-  if (err) throw err;
-  console.log("Saved Jira data to jiraData.json");
-});
 
-fs.writeFile("slackData.json", JSON.stringify(slackData, null, 2), (err) => {
-  if (err) throw err;
-  console.log("Saved Slack data to slackData.json");
-});
