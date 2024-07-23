@@ -1,0 +1,10 @@
+{
+  "username": "root",
+  "password": "test1234",
+  "database": "postgres",
+  "host": "127.0.0.1",
+  "dialect": "postgres",
+  "dialectOptions": {
+    "charset": "utf8"
+  }
+}
