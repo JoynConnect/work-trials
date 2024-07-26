@@ -35,14 +35,22 @@ jobs:
         docker build -t ${{ env.DOCKER_HUB_USERNAME }}/client:latest ./JD-FullStack-Engineer/client
         docker push ${{ env.DOCKER_HUB_USERNAME }}/client:latest
 
+    - name: Build and push DB image
+      run: |
+        docker build -t ${{ env.DOCKER_HUB_USERNAME }}/database:latest ./JD-FullStack-Engineer/database
+        docker push ${{ env.DOCKER_HUB_USERNAME }}/database:latest
+
     - name: Deploy to AWS EC2
       env:
         SSH_PRIVATE_KEY: ${{ env.SSH_PRIVATE_KEY }}
         EC2_HOST: ${{ env.EC2_HOST }}
       run: |
         chmod 600 secrets/id_rsa
-        ssh -o StrictHostKeyChecking=no -tt -i secrets/id_rsa $EC2_HOST
-          docker pull ${{ env.DOCKER_HUB_USERNAME }}/backend:latest
-          docker pull ${{ env.DOCKER_HUB_USERNAME }}/client:latest
-          docker-compose down
-          docker-compose up -d
+        ssh -o StrictHostKeyChecking=no -tt -i secrets/id_rsa $EC2_HOST  << EOF
+        docker pull ${{ env.DOCKER_HUB_USERNAME }}/backend:latest
+        docker pull ${{ env.DOCKER_HUB_USERNAME }}/client:latest
+        docker pull ${{ env.DOCKER_HUB_USERNAME }}/database:latest
+        docker run ${{ env.DOCKER_HUB_USERNAME }}/database
+        docker run ${{ env.DOCKER_HUB_USERNAME }}/client
+        docker run ${{ env.DOCKER_HUB_USERNAME }}/backend
+        EOF
