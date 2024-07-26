@@ -40,8 +40,8 @@ jobs:
         SSH_PRIVATE_KEY: ${{ env.SSH_PRIVATE_KEY }}
         EC2_HOST: ${{ env.EC2_HOST }}
       run: |
-        chmod 600 secrets/ec2key
-        ssh -o StrictHostKeyChecking=no -i secrets/ec2key ubuntu@$EC2_HOST
+        chmod 600 secrets/id_rsa
+        ssh -o StrictHostKeyChecking=no -i secrets/id_rsa ubuntu@$EC2_HOST
           docker pull ${{ env.DOCKER_HUB_USERNAME }}/backend:latest
           docker pull ${{ env.DOCKER_HUB_USERNAME }}/client:latest
           docker-compose down
