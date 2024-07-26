@@ -11,34 +11,31 @@ async function normalizeEvent(event, source) {
       return {
         id: UUIDV4(),
         source: source,
-        timestamp: new Date(event.updated || event.created),
         userId: event.assignee.emailAddress,
         eventType: event.status.name || 'issue_updated',
         eventData: JSON.stringify(event), // You might want to select specific fields
-        createdAt: new Date(),
-        updatedAt: new Date()
+        createdAt: event.created? new Date(event.created) : new Date(),
+        updatedAt: event.updated? new Date(event.updated) : new Date()
       };
     case 'Notion':
       return {
         id: UUIDV4(),
         source: source,
-        timestamp: event.last_edited_time || event.created_time,
         userId: event.properties.Assignee.people[0].email,
         eventType: event.properties.Status.select.name || 'page_updated',
         eventData: JSON.stringify(event.properties), // Or select specific properties
-        createdAt: new Date(),
-        updatedAt: new Date()
+        createdAt: event.created_time? new Date(event.created_time) : new Date(),
+        updatedAt: event.last_edited_time? new Date(event.last_edited_time) : new Date()
       };
     case 'Slack':
       return {
         id: UUIDV4(),
         source: source,
-        timestamp: new Date(parseFloat(event.ts)).toISOString(), // Convert Slack timestamp
         userId: event.user,
         eventType: event.type,
         eventData: JSON.stringify({ text: event.text }), // You could include more Slack data
-        createdAt: new Date(),
-        updatedAt: new Date()
+        createdAt: new Date(parseFloat(event.ts)).toISOString(),
+        updatedAt: new Date(parseFloat(event.ts)).toISOString()
       };
   }
 }

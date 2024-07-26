@@ -87,31 +87,6 @@
             }
           }
         }
-      },
-      "post": {
-        "summary": "Create a new event",
-        "description": "Create a new event with the specified details.",
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "'#/components/schemas/Event'"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Event created successfully"
-          },
-          "400": {
-            "description": "Bad request"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
       }
     },
     "/events/{id}": {
@@ -140,67 +115,6 @@
                 }
               }
             }
-          },
-          "404": {
-            "description": "Event not found"
-          }
-        }
-      },
-      "put": {
-        "summary": "Update an event",
-        "description": "Update an existing event by ID.",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "description": "Event ID"
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Event"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Event updated successfully"
-          },
-          "404": {
-            "description": "Event not found"
-          },
-          "500": {
-            "description": "Internal server error"
-          }
-        }
-      },
-      "delete": {
-        "summary": "Delete an event",
-        "description": "Delete an event by ID.",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "id",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "format": "uuid"
-            },
-            "description": "Event ID"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Event deleted successfully"
           },
           "404": {
             "description": "Event not found"
@@ -244,6 +158,54 @@
       "get": {
         "summary": "Get aggregated statistics",
         "description": "Retrieve aggregate statistics about the events.",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "Page number (default 1)"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "type": "integer",
+              "default": 10
+            },
+            "description": "Number of events per page (default 10)"
+          },
+          {
+            "in": "query",
+            "name": "sortBy",
+            "schema": {
+              "type": "string",
+              "default": "timestamp",
+              "enum": ["timestamp", "userId", "eventType"]
+            },
+            "description": "Field to sort by (timestamp, userId, or eventType)"
+          },
+          {
+            "in": "query",
+            "name": "sortOrder",
+            "schema": {
+              "type": "string",
+              "default": "DESC",
+              "enum": ["ASC", "DESC"]
+            },
+            "description": "Sort order (ASC or DESC)"
+          },
+          {
+            "in": "query",
+            "name": "filter",
+            "schema": {
+              "type": "object"
+            },
+            "description": "Filter by fields (e.g., ?filter[source]=Jira&filter[userId]=user123)"
+          }
+        ],
         "responses": {
           "200": {
             "description": "Successful response with statistics"

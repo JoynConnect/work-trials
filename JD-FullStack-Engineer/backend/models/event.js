@@ -11,10 +11,6 @@ const Event = sequelize.define('Event', {
     type: DataTypes.ENUM('Jira', 'Notion', 'Slack'),
     allowNull: false
   },
-  timestamp: {
-    type: DataTypes.DATE,
-    allowNull: false
-  },
   userId: {
     // Note: Sequelize converts userId to user_id in the database
     type: DataTypes.STRING,

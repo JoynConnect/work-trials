@@ -11,15 +11,6 @@ router.get('/events/:id', eventController.getEventById);
 // GET all events for a specific user
 router.get('/users/:userId/events', eventController.getUserFootprints);
 
-// POST a new event
-router.post('/events', eventController.createEvent);
-
-// PUT (update) an existing event
-router.put('/events/:id', eventController.updateEvent);
-
-// DELETE an event
-router.delete('/events/:id', eventController.deleteEvent);
-
 // GET aggregated statistics
 router.get('/stats', eventController.getStats);
 
