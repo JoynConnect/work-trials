@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: test1234
+          POSTGRES_DB: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v2
+      with:
+        node-version: '18'
+
+    - name: Install dependencies for API
+      run: |
+        cd ./JD-FullStack-Engineer/backend
+        npm install
+
+    - name: Install dependencies for Dashboard
+      run: |
+        cd ./JD-FullStack-Engineer/client
+        npm install
+
+    - name: Run backend tests
+      run: |
+        cd ./JD-FullStack-Engineer/backend
+        npm test
+
+    - name: Run frontend tests
+      run: |
+        cd ./JD-FullStack-Engineer/client
+        npm test
