@@ -41,10 +41,10 @@ jobs:
         EC2_HOST: ${{ env.EC2_HOST }}
       run: |
         mkdir -p ~/.ssh/ && touch ~/.ssh/known_hosts
-        ssh-keyscan ubuntu@$EC2_HOST >> ~/.ssh/known_hosts
+        ssh-keyscan $EC2_HOST >> ~/.ssh/known_hosts
         eval $(ssh-agent)
         ssh-add secrets/id_rsa
-        ssh -i secrets/id_rsa -o UserKnownHostsFile=/github/home/.ssh/known_hosts -tt ubuntu@$EC2_HOST "echo test > testfile1"
+        ssh -i secrets/id_rsa -o UserKnownHostsFile=/github/home/.ssh/known_hosts -tt $EC2_HOST "echo test > testfile1"
           docker pull ${{ env.DOCKER_HUB_USERNAME }}/backend:latest
           docker pull ${{ env.DOCKER_HUB_USERNAME }}/client:latest
           docker-compose down
