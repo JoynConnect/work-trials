@@ -17,4 +17,6 @@ COPY . .
 EXPOSE 4000
 
 # Start the application
+RUN npm run seeders-up
+
 CMD ["npm", "start"]
