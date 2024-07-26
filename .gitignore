@@ -1,0 +1,5 @@
+/JD-FullStack-Engineer/client/node_modules/
+/JD-FullStack-Engineer/server/node_modules/
+/JD-FullStack-Engineer/dataGen/node_modules/
+/JD-FullStack-Engineer/backend/node_modules/
+/.env
