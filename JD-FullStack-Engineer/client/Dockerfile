@@ -3,6 +3,7 @@ FROM node:18-alpine AS build
 WORKDIR /app
 COPY package.json ./
 COPY package-lock.json ./
+COPY .npmrc ./
 RUN npm install
 COPY . .
 RUN npm run build
