@@ -25,15 +25,6 @@ jobs:
         username: ${{ env.DOCKER_HUB_USERNAME }}
         password: ${{ env.DOCKER_HUB_PASSWORD }}
 
-    - name: Build and push Backend image
-      run: |
-        docker build -t ${{ env.DOCKER_HUB_USERNAME }}/backend:latest ./JD-FullStack-Engineer/backend
-        docker push ${{ env.DOCKER_HUB_USERNAME }}/backend:latest
-
-    - name: Build and push Client image
-      run: |
-        docker build -t ${{ env.DOCKER_HUB_USERNAME }}/client:latest ./JD-FullStack-Engineer/client
-        docker push ${{ env.DOCKER_HUB_USERNAME }}/client:latest
 
     - name: Deploy to AWS EC2
       env:
@@ -41,8 +32,11 @@ jobs:
         EC2_HOST: ${{ env.EC2_HOST }}
       run: |
         chmod 600 secrets/id_rsa
-        ssh -o StrictHostKeyChecking=no -tt -i secrets/id_rsa $EC2_HOST
-          docker pull ${{ env.DOCKER_HUB_USERNAME }}/backend:latest
-          docker pull ${{ env.DOCKER_HUB_USERNAME }}/client:latest
-          docker-compose down
-          docker-compose up -d
+        ssh -o StrictHostKeyChecking=no -tt -i secrets/id_rsa $EC2_HOST  << EOF
+        docker pull ${{ env.DOCKER_HUB_USERNAME }}/backend:latest
+        docker pull ${{ env.DOCKER_HUB_USERNAME }}/client:latest
+        docker pull ${{ env.DOCKER_HUB_USERNAME }}/database:latest
+        sudo docker run -d ${{ env.DOCKER_HUB_USERNAME }}/database
+        sudo docker run -d  ${{ env.DOCKER_HUB_USERNAME }}/client
+        sudo docker run -d  ${{ env.DOCKER_HUB_USERNAME }}/backend
+        EOF
