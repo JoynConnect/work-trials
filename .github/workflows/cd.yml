@@ -40,7 +40,10 @@ jobs:
         SSH_PRIVATE_KEY: ${{ env.SSH_PRIVATE_KEY }}
         EC2_HOST: ${{ env.EC2_HOST }}
       run: |
-        chmod 600 secrets/id_rsa
+        mkdir -p ~/.ssh/ && touch ~/.ssh/known_hosts
+        ssh-keyscan ubuntu@$EC2_HOST >> ~/.ssh/known_hosts
+        eval $(ssh-agent)
+        ssh-add secrets/id_rsa
         ssh -i secrets/id_rsa -o UserKnownHostsFile=/github/home/.ssh/known_hosts -tt ubuntu@$EC2_HOST "echo test > testfile1"
           docker pull ${{ env.DOCKER_HUB_USERNAME }}/backend:latest
           docker pull ${{ env.DOCKER_HUB_USERNAME }}/client:latest
