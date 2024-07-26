@@ -45,4 +45,3 @@ jobs:
           docker pull ${{ env.DOCKER_HUB_USERNAME }}/client:latest
           docker-compose down
           docker-compose up -d
-EOF
