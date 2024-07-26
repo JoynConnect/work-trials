@@ -40,8 +40,10 @@ jobs:
         SSH_PRIVATE_KEY: ${{ env.SSH_PRIVATE_KEY }}
         EC2_HOST: ${{ env.EC2_HOST }}
       run: |
-        ssh -o StrictHostKeyChecking=no -i "$SSH_PRIVATE_KEY" ubuntu@$EC2_HOST << 'EOF'
-          docker pull ${{ env.DOCKER_HUB_USERNAME }}/backend:latest
-          docker pull ${{ env.DOCKER_HUB_USERNAME }}/client:latest
+        echo "${{ env.SSH_PRIVATE_KEY }}" > private_key
+        chmod 600 private_key
+        ssh -o StrictHostKeyChecking=no -i private_key ubuntu@$EC2_HOST << 'EOF'
+          docker pull ${{ env.DOCKER_HUB_USERNAME }}/rest-api:latest
+          docker pull ${{ env.DOCKER_HUB_USERNAME }}/dashboard:latest
           docker-compose down
           docker-compose up -d
