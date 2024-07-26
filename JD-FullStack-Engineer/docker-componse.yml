@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  api:
+    build: ./backend
+    ports:
+      - "4000:4000"
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: yourpassword
+      POSTGRES_DB: postgres
+      POSTGRES_HOST: db
+    depends_on:
+      - db
+    command: >
+      sh -c "npm run seeders-up && npm start"
+
+  client:
+    build: ./client
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+
+  db:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: test1234
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./backend/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+
+volumes:
+  pgdata:
