@@ -1,0 +1,10 @@
+
+CREATE TABLE IF NOT EXISTS "Events" (
+    id UUID PRIMARY KEY,
+    "source" ENUM('TRACKER_RUN', 'TRACKER_CHECK', 'TRACKER_PREP') NOT NULL
+    "timestamp" TIMESTAMP NOT NULL,
+    "userId" VARCHAR(255) NOT NULL, 
+    "eventType" VARCHAR(255) NOT NULL,
+    "eventData" JSONB NOT NULL
+);
+
